@@ -127,6 +127,113 @@ static int __cpuinit msm_boot_secondary(unsigned int cpu, struct task_struct *id
 	return pen_release != -1 ? -ENOSYS : 0;
 }
 
+DEFINE_PER_CPU(int, cold_boot_done);
+
+int __cpuinit scorpion_boot_secondary(unsigned int cpu,
+				      struct task_struct *idle)
+{
+	pr_debug("Starting secondary CPU %d\n", cpu);
+
+	if (per_cpu(cold_boot_done, cpu) == false) {
+		scorpion_release_secondary();
+		per_cpu(cold_boot_done, cpu) = true;
+	}
+	return release_from_pen(cpu);
+}
+
+int __cpuinit msm8960_boot_secondary(unsigned int cpu, struct task_struct *idle)
+{
+	pr_debug("Starting secondary CPU %d\n", cpu);
+
+	if (per_cpu(cold_boot_done, cpu) == false) {
+		msm8960_release_secondary(0x02088000, cpu);
+		per_cpu(cold_boot_done, cpu) = true;
+	}
+	return release_from_pen(cpu);
+}
+
+int __cpuinit msm8974_boot_secondary(unsigned int cpu, struct task_struct *idle)
+{
+	pr_debug("Starting secondary CPU %d\n", cpu);
+
+	if (per_cpu(cold_boot_done, cpu) == false) {
+		if (of_board_is_sim())
+			release_secondary_sim(APCS_ALIAS0_BASE_ADDR, cpu);
+		else if (!of_board_is_rumi())
+			msm8974_release_secondary(APCS_ALIAS0_BASE_ADDR, cpu);
+
+		per_cpu(cold_boot_done, cpu) = true;
+	}
+	return release_from_pen(cpu);
+}
+
+int __cpuinit msm8962_boot_secondary(unsigned int cpu, struct task_struct *idle)
+{
+	pr_debug("Starting secondary CPU %d\n", cpu);
+
+	if (per_cpu(cold_boot_done, cpu) == false) {
+		if (of_board_is_sim())
+			release_secondary_sim(APCS_ALIAS0_BASE_ADDR, cpu);
+		else if (!of_board_is_rumi())
+			msm8962_release_secondary(APCS_ALIAS0_BASE_ADDR, cpu);
+
+		per_cpu(cold_boot_done, cpu) = true;
+	}
+	return release_from_pen(cpu);
+}
+
+static int __cpuinit msm8916_boot_secondary(unsigned int cpu,
+						struct task_struct *idle)
+{
+	pr_debug("Starting secondary CPU %d\n", cpu);
+
+	if (per_cpu(cold_boot_done, cpu) == false) {
+		if (of_board_is_sim())
+			release_secondary_sim(0xb088000, cpu);
+		else if (!of_board_is_rumi())
+			arm_release_secondary(0xb088000, cpu);
+
+		per_cpu(cold_boot_done, cpu) = true;
+	}
+	return release_from_pen(cpu);
+}
+
+static int __cpuinit msm8936_boot_secondary(unsigned int cpu,
+						struct task_struct *idle)
+{
+	pr_debug("Starting secondary CPU %d\n", cpu);
+
+	if (per_cpu(cold_boot_done, cpu) == false) {
+		u32 mpidr = cpu_logical_map(cpu);
+		u32 apcs_base = MPIDR_AFFINITY_LEVEL(mpidr, 1) ?
+				0xb088000 : 0xb188000;
+		if (of_board_is_sim())
+			release_secondary_sim(apcs_base,
+				MPIDR_AFFINITY_LEVEL(mpidr, 0));
+		else if (!of_board_is_rumi())
+			arm_release_secondary(apcs_base,
+				MPIDR_AFFINITY_LEVEL(mpidr, 0));
+
+		per_cpu(cold_boot_done, cpu) = true;
+	}
+	return release_from_pen(cpu);
+}
+
+int __cpuinit arm_boot_secondary(unsigned int cpu, struct task_struct *idle)
+{
+	pr_debug("Starting secondary CPU %d\n", cpu);
+
+	if (per_cpu(cold_boot_done, cpu) == false) {
+		if (of_board_is_sim())
+			release_secondary_sim(APCS_ALIAS0_BASE_ADDR, cpu);
+		else if (!of_board_is_rumi())
+			arm_release_secondary(APCS_ALIAS0_BASE_ADDR, cpu);
+
+		per_cpu(cold_boot_done, cpu) = true;
+	}
+	return release_from_pen(cpu);
+}
+
 /*
  * Initialise the CPU possible map early - this describes the CPUs
  * which may be present or become present in the system. The msm8x60

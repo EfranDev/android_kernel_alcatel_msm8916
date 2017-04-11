@@ -272,6 +272,8 @@ libs-y				:= arch/arm/lib/ $(libs-y)
 # Default target when executing plain make
 ifeq ($(CONFIG_XIP_KERNEL),y)
 KBUILD_IMAGE := xipImage
+else ifeq ($(CONFIG_BUILD_ARM_APPENDED_DTB_IMAGE),y)
+KBUILD_IMAGE := zImage-dtb
 else
 KBUILD_IMAGE := zImage
 endif
@@ -300,8 +302,22 @@ zinstall uinstall install: vmlinux
 %.dtb: scripts
 	$(Q)$(MAKE) $(build)=$(boot)/dts MACHINE=$(MACHINE) $(boot)/dts/$@
 
+#[PLATFORM]-Mod-BGEIN by TCTNB.YJ,2014/03/17, add 8X16 & Alto45 config.
 dtbs: scripts
 	$(Q)$(MAKE) $(build)=$(boot)/dts MACHINE=$(MACHINE) dtbs
+#ifndef CONFIG_TCT_8X16_COMMON
+	$(Q)$(MAKE) $(build)=$(boot)/dts/qcom MACHINE=$(MACHINE) dtbs
+#endif
+ifdef CONFIG_TCT_8X16_ALTO45
+	$(Q)$(MAKE) $(build)=$(boot)/dts/alto45 MACHINE=$(MACHINE) dtbs
+endif
+#[PLATFORM]-Add-END by TCTNB.YJ
+ifdef CONFIG_TCT_8X16_POP8LTE
+	$(Q)$(MAKE) $(build)=$(boot)/dts/pop8lte MACHINE=$(MACHINE) dtbs
+endif
+
+zImage-dtb: vmlinux scripts dtbs
+	$(Q)$(MAKE) $(build)=$(boot) MACHINE=$(MACHINE) $(boot)/$@
 
 # We use MRPROPER_FILES and CLEAN_FILES now
 archclean:

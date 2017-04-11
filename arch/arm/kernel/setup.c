@@ -824,6 +824,7 @@ void __init setup_arch(char **cmdline_p)
 		smp_init_cpus();
 	}
 #endif
+	arm_dt_init_cpu_maps();
 
 	if (!is_smp())
 		hyp_mode_check();
