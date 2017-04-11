@@ -210,13 +210,31 @@ dtb-$(CONFIG_ARCH_VT8500) += vt8500-bv07.dtb \
 	wm8850-w70v2.dtb
 dtb-$(CONFIG_ARCH_ZYNQ) += zynq-zc702.dtb
 
+DTB_NAMES := $(subst $\",,$(CONFIG_BUILD_ARM_APPENDED_DTB_IMAGE_NAMES))
+ifneq ($(DTB_NAMES),)
+DTB_LIST := $(addsuffix .dtb,$(DTB_NAMES))
+else
+DTB_LIST := $(dtb-y)
+endif
+
 targets += dtbs
-targets += $(dtb-y)
+targets += $(DTB_LIST)
+
+#[PLATFORM]-Mod-BGEIN by TCTNB.YJ,2014/03/17, add 8X16 & Alto45 config.
+#used for cleaning - not building
+#ifndef CONFIG_TCT_8X16_COMMON
+subdir- := qcom
+#endif
+ifdef CONFIG_TCT_8X16_ALTO45
+subdir- := alto45
+endif
+#[PLATFORM]-Add-END by TCTNB.YJ
+
 endif
 
 # *.dtb used to be generated in the directory above. Clean out the
 # old build results so people don't accidentally use them.
-dtbs: $(addprefix $(obj)/, $(dtb-y))
+dtbs: $(addprefix $(obj)/, $(DTB_LIST))
 	$(Q)rm -f $(obj)/../*.dtb
 
 clean-files := *.dtb
