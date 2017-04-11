@@ -881,7 +881,7 @@ static ssize_t show_available_freqs(struct device *d,
 
 	rcu_read_lock();
 	do {
-		opp = opp_find_freq_ceil(dev, &freq);
+		opp = dev_pm_opp_find_freq_ceil(dev, &freq);
 		if (IS_ERR(opp))
 			break;
 
