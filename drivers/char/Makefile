@@ -62,3 +62,8 @@ obj-$(CONFIG_JS_RTC)		+= js-rtc.o
 js-rtc-y = rtc.o
 
 obj-$(CONFIG_TILE_SROM)		+= tile-srom.o
+obj-$(CONFIG_DIAG_CHAR)		+= diag/
+# [BUGFIX]-Mod-BEGIN by TCTNJ.(hui.wei),04/03/2014, FR-622499,.
+obj-y += oemver/
+# [BUGFIX]-Mod-END  by TCTNJ.(hui.wei)
+obj-y += oemfuse/
